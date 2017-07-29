@@ -45,7 +45,7 @@ var logger = new (winston.Logger)({
 });
 var mongodb;
 var collectionUser;
-var collectionList;
+var collectionTransaction;
 function dbconnect(url,callback)
 {
 
@@ -59,7 +59,7 @@ function dbconnect(url,callback)
     logger.info("Connected correctly to server");
     mongodb=db;
     collectionUser = mongodb.collection('User');
-    collectionList = mongodb.collection('Wishlist');
+    collectionTransaction = mongodb.collection('Transaction');
     callback();
   });
 }
@@ -257,9 +257,107 @@ function addToList(startDate, endDate, dayList,item){
   } 
   return dayList;
 }
+var d = new Date();
+var todayDate = new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
+var jrlist_core =    [
+    {_id:0,date:todayDate,title:'초기금액',expense:0,income:23,category:'Essen',memo:'초기잔고설정'},
+    {_id:1,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Shopping',memo:''},
+    {_id:2,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''},
+    {_id:3,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''},
+    {_id:4,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''}
+  ];
+  var currentID = 5;
+app.post('/item/add',function(req,res){
+  if(req.user)
+  {
+    console.log(req.body);
+    var expense = req.body.expense?parseFloat(req.body.expense):0;
+    var income = req.body.income?parseFloat(req.body.income):0;
+
+    collectionTransaction.insertOne({owner:req.user._id,date:new Date(req.body.date),title:req.body.title,
+      expense:expense,income:income,category:req.body.category,memo:req.body.memo},function(err){
+        if(err){logger.error('/item/add',err);return err;}
+        res.redirect('/daily');
+    })
+  }
+  else{
+    logger.info('/item/add not valid access')
+    res.send('not valid access');
+  }
+
+})
+app.post('/item/modify',function(req,res){
+  if(req.user)
+  {
+    console.log(req.body);
+    var id = ObjectId(req.body.id);
+    var expense = req.body.expense?parseFloat(req.body.expense):0;
+    var income = req.body.income?parseFloat(req.body.income):0;
+    
+    collectionTransaction.updateOne({_id:id},{$set:{date:new Date(req.body.date),title:req.body.title,
+      expense:expense,income:income,category:req.body.category,memo:req.body.memo}},function(err){
+        if(err){logger.error('/item/update',err);return err;}
+        res.redirect('/daily');
+    })
+  }
+  else{
+    logger.info('/item/modify not valid access')
+    res.send('not valid access');
+  }
+
+})
+
+app.post('/item/delete',function(req,res){
+  if(req.user)
+  {
+    console.log(req.body);
+    var id = ObjectId(req.body.id);
+
+    collectionTransaction.remove({_id:id},function(err){
+        if(err){logger.error('/item/delete',err);return err;}
+        res.redirect('/daily');
+    })
+  }
+  else{
+    logger.info('/item/modify not valid access')
+    res.send('not valid access');
+  }
+
+})
+
+function setBalance(list)
+{
+  var currentBalance = 0;
+ //sorting
+ for(var i=0;i<list.length;i++)
+ {
+   currentBalance = currentBalance-list[i].expense+list[i].income;
+   list[i].balance = currentBalance;
+ }
+ return list;
+}
+app.get('/daily',function(req, res) {
+  if(req.user)
+  {
+      collectionTransaction.find({owner:req.user._id},function(err,cursor){
+        if(err){logger.error('/daily find',err);return err;}
+        
+        cursor.sort({date:1}).toArray(function(err,list){
+        if(err){logger.error('/daily toArray',err);return err;}
+          var jrlist = setBalance(list);
+          res.render('dailynote.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
+        })
+    })
+  }
+  else{
+    logger.info('/item/add not valid access')
+    res.send('not valid access');
+  }
+
+})
 app.get('/',function(req,res){
-  // if(req.user) //logged in user?
-  // {
+  if(req.user) //logged in user?
+  {
   var list = [
     {title:'집세',price:795,type:'expense',repeat:true,repeatterm:'monthly',repeatdate:1,startYear:2017,startMonth:7},
     {title:'집주차비',price:36,type:'expense',repeat:true,repeatterm:'monthly',repeatdate:1,startYear:2017,startMonth:7},
@@ -276,13 +374,39 @@ app.get('/',function(req,res){
     {title:'재림용돈',price:100,type:'expense',repeat:true,repeatterm:'monthly',repeatdate:2,startYear:2017,startMonth:7},
     {title:'병수용돈',price:100,type:'expense',repeat:true,repeatterm:'monthly',repeatdate:2,startYear:2017,startMonth:7},
     {title:'병수회사',price:100,type:'expense',repeat:true,repeatterm:'monthly',repeatdate:2,startYear:2017,startMonth:7},
-    {title:'KinderGeld',price:100,type:'income',repeat:true,repeatterm:'monthly',repeatdate:20,startYear:2017,startMonth:7},
+    {title:'KinderGeld',price:192,type:'income',repeat:true,repeatterm:'monthly',repeatdate:20,startYear:2017,startMonth:7},
     {title:'ALG',price:2070,type:'income',repeat:true,repeatterm:'monthly',repeatdate:27,startYear:2017,startMonth:9},
-    {title:'ALG',price:550,type:'income',repeat:false,date:27,year:2017,month:8}
+    {title:'ALG',price:550,type:'income',repeat:false,date:27,year:2017,month:8},
+    {title:'JR_Klavier',price:200,type:'income',repeat:false,date:15,year:2017,month:7},
+    {title:'JR_Klavier',price:50,type:'income',repeat:false,date:8,year:2017,month:9},
+    {title:'JR_Klavier',price:150,type:'income',repeat:false,date:7,year:2017,month:10},
+    {title:'JR운전면허_EHK',price:30,type:'expense',repeat:false,date:29,year:2017,month:6},
+    {title:'JR운전면허_등록',price:45,type:'expense',repeat:false,date:1,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:7,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:10,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:14,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:17,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:21,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:24,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:28,year:2017,month:7},
+    {title:'JR운전면허_도로연수',price:45,type:'expense',repeat:false,date:31,year:2017,month:7},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:4,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:6,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:8,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:11,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:13,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:15,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:18,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:20,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:22,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:25,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:27,year:2017,month:8},
+    {title:'JR운전면허_SF',price:45,type:'expense',repeat:false,date:29,year:2017,month:8},
+    {title:'빌림',price:1000,type:'income',repeat:false,date:29,year:2017,month:7},
     ];
   var initBalance = 5618;
   var initDate = new Date(2017,6,27,0,0,0,0);//remove hours,minitue,seconds
-  var duration = 210;
+  var duration = 365;
   var dailyList ={};
   console.log('initDate',initDate)
 
@@ -357,11 +481,10 @@ app.get('/',function(req,res){
   //   ];
     
     res.render('home_login',{list:list,dailyList:mylist});
-  // }
-  // else{
-  //   res.render('landingpage');
-    
-  // }
+  }
+  else{
+    res.render('landingpage');
+  }
 })
 
 app.listen(process.env.PORT || config.NODE_PORT, process.env.IP || "0.0.0.0",function(){

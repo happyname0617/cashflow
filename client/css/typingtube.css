@@ -303,9 +303,9 @@ textarea {
   background-size: 100%;
   margin-bottom:5px;
 }
-.wishlistrow {
-    text-align: center;
-}
+/*.wishlistrow .div .col-md-2 {*/
+/*    text-align: center;*/
+/*}*/
 .coupletitle {
     font-family: 'Nanum Brush Script', serif;
     padding-top: 50px;
