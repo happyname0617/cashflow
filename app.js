@@ -362,8 +362,7 @@ app.get('/admin/bindtest',function(req, res) {
       res.send('good!')
     });
 })
-
-app.get('/daily',function(req, res) {
+app.get('/dailyfamily',function(req, res) {
   if(req.user)
   {
     getFamilyMembers(req.user.familyID,function(err,members){
@@ -377,6 +376,26 @@ app.get('/daily',function(req, res) {
           })
       })      
     })
+
+  }
+  else{
+    logger.info('/item/add not valid access')
+    res.redirect('/login');
+  }
+
+})
+app.get('/daily',function(req, res) {
+  if(req.user)
+  {
+    collectionTransaction.find({owner:req.user._id},function(err,cursor){
+        if(err){logger.error('/daily find',err);return err;}
+        
+        cursor.sort({date:1}).toArray(function(err,list){
+          if(err){logger.error('/daily toArray',err);return err;}
+          var jrlist = setBalance(list);
+          res.render('dailynote.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
+        })
+    })      
 
   }
   else{
