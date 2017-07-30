@@ -46,6 +46,7 @@ var logger = new (winston.Logger)({
 var mongodb;
 var collectionUser;
 var collectionTransaction;
+var collectionFamily;
 function dbconnect(url,callback)
 {
 
@@ -60,6 +61,7 @@ function dbconnect(url,callback)
     mongodb=db;
     collectionUser = mongodb.collection('User');
     collectionTransaction = mongodb.collection('Transaction');
+    collectionFamily = mongodb.collection('Family');
     callback();
   });
 }
@@ -208,24 +210,6 @@ app.get('/auth/google/callback',
                                     failureRedirect: '/' }));
 
 var TERM = {monthly:1,quaterly:3,yearly:12};
-// function getNextAvailableDate(startDateTimeStamp,repeatdate,repeatterm)
-// {
-//   var startDate = new Date(startDateTimeStamp)
-//   var month = 
-//   var firstCandidate = new Date(startDate.getFullYear(), month, repeatdate,
-//           startDate.getHours(), startDate.getMinutes(), startDate.getSeconds(), startDate.getMilliseconds());
-  
-//   if(firstCandidate>startDate)
-//   {
-//     return firstCandidate;
-//   }
-//   else
-//   {
-//     var m = moment(firstCandidate);
-//     m.add(TERM[repeatterm],'months');
-//     return m.toDate();
-//   }
-// }
 
 function addToList(startDate, endDate, dayList,item){
   if(item.repeat)
@@ -257,16 +241,8 @@ function addToList(startDate, endDate, dayList,item){
   } 
   return dayList;
 }
-var d = new Date();
-var todayDate = new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
-var jrlist_core =    [
-    {_id:0,date:todayDate,title:'초기금액',expense:0,income:23,category:'Essen',memo:'초기잔고설정'},
-    {_id:1,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Shopping',memo:''},
-    {_id:2,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''},
-    {_id:3,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''},
-    {_id:4,date:todayDate,title:'삽겹살',expense:3.84,income:0,category:'Essen',memo:''}
-  ];
-  var currentID = 5;
+// var d = new Date();
+// var todayDate = new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
 app.post('/item/add',function(req,res){
   if(req.user)
   {
@@ -282,7 +258,7 @@ app.post('/item/add',function(req,res){
   }
   else{
     logger.info('/item/add not valid access')
-    res.send('not valid access');
+    res.redirect('/login');
   }
 
 })
@@ -302,7 +278,7 @@ app.post('/item/modify',function(req,res){
   }
   else{
     logger.info('/item/modify not valid access')
-    res.send('not valid access');
+    res.redirect('/login');
   }
 
 })
@@ -320,7 +296,7 @@ app.post('/item/delete',function(req,res){
   }
   else{
     logger.info('/item/modify not valid access')
-    res.send('not valid access');
+    res.redirect('/login');
   }
 
 })
@@ -336,22 +312,76 @@ function setBalance(list)
  }
  return list;
 }
+
+app.get('/login',function(req, res) {
+    
+    res.render('login.pug')
+})
+
+
+function getFamilyMembers(familyID,callback){
+
+  collectionFamily.findOne({_id:familyID},function(err,result){
+    callback(null,result.members);
+  })
+}
+function joinFamily(userID,familyID,callback){
+    collectionUser.updateOne({_id:userID},{$set:{familyID:familyID}},function(err){
+      if(err){logger.error('join family userupdate',err);callback(err)}
+      collectionFamily.updateOne({_id:familyID},{$push:{members:userID}},function(err){
+        if(err){logger.error('join family memberupdate',err);callback(err)}
+        callback();
+      })
+    })
+}
+
+function createFamily(callback){
+  var family = {members:[]};
+  collectionFamily.insertOne(family,function(err, insertedDocument) {
+    if (err) {logger.error(err); callback(err); }
+    logger.info('createFamily: successfully done:'+insertedDocument.insertedId);
+    callback(null,insertedDocument.insertedId);
+  })
+}
+
+function bindFamily_test(callback){
+  var family = ['facebook:1523853431008054','facebook:1462769290453662'];
+  createFamily(function(err,familiyID){
+    if (err) {logger.error(err); callback(err); }
+      joinFamily(family[0],familiyID,function(err){
+        joinFamily(family[1],familiyID,function(err){
+          callback();
+        })
+      })
+  })
+}
+
+app.get('/admin/bindtest',function(req, res) {
+    bindFamily_test(function(err){
+      logger.info('/admin/bindtest done');
+      res.send('good!')
+    });
+})
+
 app.get('/daily',function(req, res) {
   if(req.user)
   {
-      collectionTransaction.find({owner:req.user._id},function(err,cursor){
-        if(err){logger.error('/daily find',err);return err;}
-        
-        cursor.sort({date:1}).toArray(function(err,list){
-        if(err){logger.error('/daily toArray',err);return err;}
-          var jrlist = setBalance(list);
-          res.render('dailynote.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
-        })
+    getFamilyMembers(req.user.familyID,function(err,members){
+      collectionTransaction.find({owner:{$in:members}},function(err,cursor){
+          if(err){logger.error('/daily find',err);return err;}
+          
+          cursor.sort({date:1}).toArray(function(err,list){
+            if(err){logger.error('/daily toArray',err);return err;}
+            var jrlist = setBalance(list);
+            res.render('dailynote.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
+          })
+      })      
     })
+
   }
   else{
     logger.info('/item/add not valid access')
-    res.send('not valid access');
+    res.redirect('/login');
   }
 
 })
