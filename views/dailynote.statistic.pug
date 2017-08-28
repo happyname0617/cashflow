@@ -2,16 +2,8 @@ doctype html
 include head.pug
 body
   include menu_login.pug
-  // section
-  //   #top.mainimg
-  //     #name
-  //       h1.coupletitle 온라인 가계부
-  //     #date
-  //       h4.weddingdate 김병수&김재림&김요셉 
-  //     #img
   section
-    h2 생활비가계부 
-    //.theme-showcase(role='main')
+    h2 가계부이름 
     .container-fluid
       form.form-inline(action="#" method="get")
         .form-group
@@ -156,18 +148,19 @@ body
         $('#statistic').html(htmlstr);
     }
 
+    var bookID = '#{bookID}';
     $(document).ready(function(){
         // $('#itemDateStart').val(getSetableDate(new Date()));
         $('#itemDateEnd').val(getSetableDate(new Date()));
-      
+        
 
     })
     
-            $('#getItems').on('click',function(){
+        $('#getItems').on('click',function(){
           console.log('getItems')
           var dateStart = $('#itemDateStart').val();
           var dateEnd = $('#itemDateEnd').val();
-          var data = { dateStart: dateStart, dateEnd: dateEnd};
+          var data = { bookID:bookID,dateStart: dateStart, dateEnd: dateEnd};
           console.log('data',data)
           $.getJSON( "/item/search",data  )
             .done(function( json ) {

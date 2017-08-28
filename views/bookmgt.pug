@@ -1,0 +1,83 @@
+doctype html
+include head.pug
+body
+  include menu_login.pug
+  section
+    #top.mainimg
+      #name
+        h1.coupletitle 온라인 가계부
+      #date
+        h4.weddingdate 김병수&김재림&김요셉 
+      #img
+  section
+    .btn.btn-default.btn-block(data-toggle='modal', data-target='#modalBookAdd') 추가하기 
+  section
+    .container-fluid
+      h2 가계부 목록
+      .row.wishlistheader
+        .col-md-3.col-sm-3.col-xs-3
+          h5 가계부이름
+        .col-md-2.col-sm-2.col-xs-2
+          h5 종류
+        .col-md-3.col-sm-3.col-xs-3
+          h5 메모            
+        .col-md-2.col-sm-2.col-xs-2
+          h5 열기
+        .col-md-2.col-sm-2.col-xs-2
+          h5 통계
+      each item in books
+        .row.wishlistrow
+          .col-md-3.col-sm-3.col-xs-3
+            div #{item.title}
+          .col-md-2.col-sm-2.col-xs-2
+            div #{item.type}
+          .col-md-3.col-sm-3.col-xs-3
+            div #{item.memo}
+          .col-md-2.col-sm-2.col-xs-2
+            a.btn.btn-success.btn-xs.btn-block.btnModify(href='/book/'+item._id) 열기 
+          .col-md-2.col-sm-2.col-xs-2
+            a.btn.btn-success.btn-xs.btn-block.btnModify(href='/book/stat/'+item._id) 통계 
+      div(style='padding-bottom:10px')
+  section
+    .container-fluid
+      #modalBookAdd.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+        .modal-dialog(role='document')
+          .modal-content
+            .modal-header
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') ×
+              h4.modal-title 가계부 추가
+            .modal-body
+              form(action="/books/add" method="post")
+                .form-group
+                  label(for='bookName') 이름
+                  input#bookName.form-control(type='text', placeholder='생활비',name='title',required)
+                .form-group
+                  label(for='bookType') 종류
+                  select.form-control#bookType(name='type',required)
+                    option(value='normal',select) 일반
+                    option(value='cashflow') 현금흐름
+                .form-group
+                  label(for='bookMemo') 메모
+                  input#bookMemo.form-control(type='text', placeholder='메모',name='memo')
+                .form-group
+                  button.btn.btn-success.btn-block(type='submit') 추가하기
+                // form(action="/item/delete" method="post")
+                //   .form-group
+                //     input#mDeleteItemID.form-control(type='hidden', placeholder='ID',name='id')
+                //   .form-group
+                //     button.btn.btn-danger(type='submit') 삭제하기
+            .modal-footer
+              a.btn.btn-default(type='button', data-dismiss='modal') 닫기
+script.
+
+  $(document).ready(function(){
+    
+  })
+script.
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-100905207-1', 'auto');
+  ga('send', 'pageview');

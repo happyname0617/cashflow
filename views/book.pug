@@ -1,0 +1,212 @@
+doctype html
+include head.pug
+body
+  include menu_login.pug
+  section
+    h2 가계부이름 
+  section
+    .btn.btn-default.btn-block(data-toggle='modal', data-target='#modalItemAdd') 항목 추가하기 
+  section
+    .container
+      .row.wishlistheader
+        .col-md-2.col-xs-2
+          h5 날짜
+        .col-md-2.col-xs-2
+          h5 항목
+        .col-md-1.col-xs-1
+          h5 지출
+        .col-md-1.col-xs-1
+          h5 수입
+        .col-md-1.col-xs-1
+          h5 분류
+        .col-md-2.col-xs-2
+          h5 메모
+        .col-md-1.col-xs-1
+          h5 잔고
+        .col-md-2.col-xs-2
+          h5 수정
+      each item in list
+        .row.wishlistrow
+          .col-md-2.col-xs-2
+            span #{item.date.toLocaleDateString()}
+          .col-md-2.col-xs-2
+            span #{item.title}
+          .col-md-1.col-xs-1
+            span #{item.expense.toFixed(2)}
+          .col-md-1.col-xs-1
+            span #{item.income.toFixed(2)}
+          .col-md-1.col-xs-1
+            span #{item.category}
+          .col-md-2.col-xs-2
+            span #{item.memo}
+          .col-md-1.col-xs-1
+            span #{item.balance.toFixed(2)}
+          .col-md-2.col-xs-2
+            .btn.btn-success.btn-block.btnModify(data-toggle='modal', data-target='#myModal',data-id=item._id) 수정 
+      div(style='padding-bottom:100px')
+  section
+    .container-fluid
+      #modalItemAdd.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+        .modal-dialog(role='document')
+          .modal-content
+            .modal-header
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') ×
+              h4#myModalLabel.modal-title 추가하기
+            .modal-body
+              form(action="/item/add" method="post")
+                .form-group
+                  input.form-control(type='hidden', placeholder='ID',name='bookID', value=bookID)
+                .form-group
+                  label(for='newItemDate') 날짜
+                  input#newItemDate.form-control(type='date',name='date',required)
+                .form-group
+                  label(for='newItemName') 항목
+                  input#newItemName.form-control(type='text', placeholder='삼겹살',name='title',required)
+                .form-group
+                  label(for='newItemExpense') 지출
+                  input#newItemExpense.form-control(type='number',step="0.01", placeholder='12.3',name='expense')
+                .form-group
+                  label(for='newItemIncome') 수입
+                  input#newItemIncome.form-control(type='number',step="0.01", placeholder='12.3',name='income')
+                .form-group
+                  label(for='newItemCategory') 분류
+                  select.form-control#newItemCategory(name='category',required)
+                    option(value='Essen',select) Essen
+                    option(value='Lebensmittel') Lebensmittel
+                    option(value='Joseph') Joseph
+                    option(value='Medikamente') Medikamente
+                    option(value='Kosmetik') Kosmetik
+                    option(value='Shopping') Shopping
+                    option(value='Geschenk') Geschenk
+                    option(value='Restaurant') Restaurant
+                    option(value='Leihen') 빌려주기
+                    option(value='LeihenZurueck') 빌린돈받음
+                    option(value='BalanceControl') 잔고맞춤
+                    option(value='Etc') 그외
+                .form-group
+                  label(for='newItemMemo') 메모
+                  input#newItemMemo.form-control(type='text', placeholder='메모',name='memo')
+                .form-group
+                  button.btn.btn-success.btn-block(type='submit') 추가하기
+            .modal-footer
+              a.btn.btn-default(type='button', data-dismiss='modal') 닫기      
+  section
+    .container-fluid
+      #myModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+        .modal-dialog(role='document')
+          .modal-content
+            .modal-header
+              button.close(type='button', data-dismiss='modal', aria-label='Close')
+                span(aria-hidden='true') ×
+              h4#myModalLabel.modal-title 상세정보
+            .modal-body
+              form(action="/item/modify" method="post")
+                .form-group
+                  input#mitemID.form-control(type='hidden', placeholder='ID',name='id')
+                .form-group
+                  label(for='mitemDate') 날짜
+                  input#mitemDate.form-control(type='date',name='date',required)
+                .form-group
+                  label(for='mitemName') 항목
+                  input#mitemName.form-control(type='text', placeholder='삼겹살',name='title',required)
+                .form-group
+                  label(for='mitemExpense') 지출
+                  input#mitemExpense.form-control(type='number',step="0.01", placeholder='12.3',name='expense')
+                .form-group
+                  label(for='mitemIncome') 수입
+                  input#mitemIncome.form-control(type='number',step="0.01", placeholder='12.3',name='income')
+                .form-group
+                  label(for='mitemCategory') 분류
+                  select.form-control#mitemCategory(name='category',required)
+                    option(value='Essen',select) Essen
+                    option(value='Lebensmittel') Lebensmittel
+                    option(value='Joseph') Joseph
+                    option(value='Medikamente') Medikamente
+                    option(value='Kosmetik') Kosmetik
+                    option(value='Shopping') Shopping
+                    option(value='Geschenk') Geschenk
+                    option(value='Restaurant') Restaurant
+                    option(value='Leihen') 빌려주기
+                    option(value='LeihenZurueck') 빌린돈받음
+                    option(value='BalanceControl') 잔고맞춤
+                    option(value='Etc') 그외
+                .form-group
+                  label(for='mitemMemo') 메모
+                  input#mitemMemo.form-control(type='text', placeholder='메모',name='memo')
+                .form-group
+                  button.btn.btn-success.btn-block(type='submit') 수정하기
+              form(action="/item/delete" method="post")
+                .form-group
+                  input#mDeleteItemID.form-control(type='hidden', placeholder='ID',name='id')
+                .form-group
+                  button.btn.btn-danger(type='submit') 삭제하기
+            .modal-footer
+              a.btn.btn-default(type='button', data-dismiss='modal') 닫기
+  script.
+    function getSetableDate(date) //for date input type setting
+    {
+      var d = new Date(date)
+      var day = ("0" + d.getDate()).slice(-2);
+      var month = ("0" + (d.getMonth() + 1)).slice(-2);
+      var result = d.getFullYear()+"-"+(month)+"-"+(day) ;
+      return result;
+    }
+    var list = !{liststr};
+    console.log(list);
+    var bookID = bookID;
+    $(function(){
+        $('#myModal').modal({
+            keyboard: true,
+            backdrop: "static",
+            show:false
+        }).on('show.bs.modal', function(){ //subscribe to show method
+              var id = $(this).data('id'); //get the id from tr
+              console.log($(this).data('id'));
+              var item = list.find(function(element){
+                return element._id==id;
+              })
+              console.log('id:',item._id);
+              console.log('title:',item.title);
+
+              // $(this).find('img').attr('src', item.imglink);
+              //$('#myModalLabel').text(item.title)
+              
+              // $('#itemlink').attr('href', item.link);
+              console.log('date:',item.date)
+              
+              $('#mDeleteItemID').val(id);
+              $('#mitemID').val(id);
+              $('#mitemDate').val(getSetableDate(item.date))
+              $('#mitemName').val(item.title)
+              $('#mitemExpense').val(item.expense)
+              $('#mitemIncome').val(item.income)
+              $('#mitemCategory').val(item.category)
+              $('#mitemMemo').val(item.memo)
+              // $('#price').text(item.price)
+              // $('#study').attr('href', '/study/'+videoID);
+              // $('#dictation').text('Dictation Mode')
+              // $('#dictation').attr('href', '/play/'+videoID);
+
+        }).on('hidden.bs.modal', function(){ //subscribe to show method
+              // console.log('stop video');
+              // $("iframe").attr("src", $("iframe").attr("src"));
+        });
+        
+        
+        $(".btnModify").on('click', function(){
+          console.log('.btnModify',$(this).data('id'));
+         $('#myModal').data('id',$(this).data('id'));
+        }); 
+    })
+    
+    $(document).ready(function(){
+        $('#newItemDate').val(getSetableDate(new Date()))
+    })
+  script.
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-100905207-1', 'auto');
+    ga('send', 'pageview');

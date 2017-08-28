@@ -47,6 +47,7 @@ var mongodb;
 var collectionUser;
 var collectionTransaction;
 var collectionFamily;
+var collectionBooks;
 function dbconnect(url,callback)
 {
 
@@ -62,6 +63,7 @@ function dbconnect(url,callback)
     collectionUser = mongodb.collection('User');
     collectionTransaction = mongodb.collection('Transaction');
     collectionFamily = mongodb.collection('Family');
+    collectionBooks = mongodb.collection('Books');
     callback();
   });
 }
@@ -251,16 +253,17 @@ app.get('/item/search',function(req,res){
   if(req.user)
   {
     console.log(req.query);
+    var bookID = req.query.bookID
     var startDate = new Date(req.query.dateStart)
     var endDate = new Date(req.query.dateEnd)
     
-    getFamilyMembers(req.user.familyID,function(err,members){
+          //    getFamilyMembers(req.user.familyID,function(err,members){
       var query = 
         {$and:
           [
-            {owner:{$in:members}},
             {date:{$gte:startDate}},
-            {date:{$lte:endDate}}
+            {date:{$lte:endDate}},
+            {'bookID':bookID}
           ]
         };
         collectionTransaction.find(query,function(err,cursor){
@@ -272,7 +275,6 @@ app.get('/item/search',function(req,res){
                 res.json(list);
               })
         })
-    })
   }
   else{
     logger.info('/item/add not valid access')
@@ -289,7 +291,7 @@ app.post('/item/add',function(req,res){
     var income = req.body.income?parseFloat(req.body.income):0;
 
     collectionTransaction.insertOne({owner:req.user._id,date:new Date(req.body.date),title:req.body.title,
-      expense:expense,income:income,category:req.body.category,memo:req.body.memo},function(err){
+      expense:expense,income:income,category:req.body.category,memo:req.body.memo,bookID:req.body.bookID},function(err){
         if(err){logger.error('/item/add',err);return err;}
         res.redirect('/daily');
     })
@@ -442,6 +444,87 @@ app.get('/dailyfamily',function(req, res) {
   }
 
 })
+
+app.post('/books/add',function(req,res){
+  if(req.user)
+  {
+    console.log(req.body);
+    req.body.title;
+    req.body.type;
+    req.body.memo;
+    ;
+    var income = req.body.income?parseFloat(req.body.type):0;
+    
+    collectionBooks.insertOne({owner:req.user._id,created:new Date(),title:req.body.title,
+      type:req.body.type,memo:req.body.memo},function(err){
+        if(err){logger.error('/books/add',err);return err;}
+        res.redirect('/books');
+    })
+  }
+  else{
+    logger.info('/books/add not valid access')
+    res.redirect('/login');
+  }
+
+})
+app.get('/books',function(req, res) {
+  if(req.user)
+  {
+    collectionBooks.find({owner:req.user._id},function(err,cursor){
+        if(err){logger.error('/books find',err);return err;}
+        
+        cursor.sort({date:1}).toArray(function(err,list){
+          if(err){logger.error('/books toArray',err);return err;}
+          res.render('bookmgt.pug',{books:list});
+        })
+    })      
+
+  }
+  else{
+    logger.info('/books not valid access')
+    res.redirect('/login');
+  }
+
+})
+
+app.get('/book/:id',function(req, res) {
+  if(req.user)
+  {
+    var bookID = req.params.id;
+    console.log('/book/:id',bookID);
+      collectionTransaction.find({bookID:bookID},function(err,cursor){
+          if(err){logger.error('/book find',err);return err;}
+          
+          cursor.sort({date:1}).toArray(function(err,list){
+            if(err){logger.error('/book toArray',err);return err;}
+            var jrlist = setBalance(list);
+            res.render('book.pug',{list:jrlist,liststr:JSON.stringify(jrlist),bookID:bookID});
+          })
+      })      
+
+  }
+  else{
+    logger.info('/item/add not valid access')
+    res.redirect('/login');
+  }
+
+})
+
+
+app.get('/book/stat/:id',function(req, res) {
+    if(req.user)
+    {
+      var bookID = req.params.id;
+      console.log('/book/:id',bookID);
+
+      res.render('dailynote.statistic.pug',{bookID:bookID});
+    }
+    else{
+       logger.info('dailyFamily/statistic not valid access')
+    res.redirect('/login');
+    }
+});
+
 app.get('/daily',function(req, res) {
   if(req.user)
   {
