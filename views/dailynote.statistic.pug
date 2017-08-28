@@ -94,6 +94,14 @@ body
         
       })
       
+      var total = 0;
+      for(var prop in result)
+      {
+        if(prop!='BalanceControl')
+        total += result[prop];
+      }
+      result['Total'] = total;
+      
       return result;
     }
 
