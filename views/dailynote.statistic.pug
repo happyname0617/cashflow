@@ -13,7 +13,7 @@ body
     h2 생활비가계부 
     //.theme-showcase(role='main')
     .container-fluid
-      form.form-inline(action="/item/search" method="get")
+      form.form-inline(action="#" method="get")
         .form-group
           label(for='itemDateStart') 시작날짜
           input#itemDateStart.form-control(type='date',name='dateStart',required)
@@ -21,11 +21,12 @@ body
           label(for='itemDateEnd') 종료날짜
           input#itemDateEnd.form-control(type='date',name='dateEnd',required)
         .form-group
-          button.btn.btn-default.btn-block(type='submit') 보기
+          button.btn.btn-default.btn-block#getItems(type='button') 보기
           #category
             label(for='mitemCategory') 분류
             select.form-control#mitemCategory(name='category',required)
-              option(value='Essen',select) Essen
+              option(value='All') 전체
+              option(value='Essen') Essen
               option(value='Lebensmittel') Lebensmittel
               option(value='Joseph') Joseph
               option(value='Medikamente') Medikamente
@@ -77,7 +78,7 @@ body
       var result = d.getFullYear()+"-"+(month)+"-"+(day) ;
       return result;
     }
-    var list = !{liststr};
+    var list = {};
     console.log(list)
     
     function getStatistic(){
@@ -104,16 +105,20 @@ body
       
       return result;
     }
-
-    $(document).ready(function(){
-        $('#itemDateStart').val(getSetableDate(new Date()));
-        $('#itemDateEnd').val(getSetableDate(new Date()));
-        
-        $('#mitemCategory').on('change',function(){
-          console.log('categorySelected');
+    
+    function renderItemList(){
+                console.log('categorySelected');
           var selected = $('#mitemCategory').val();
           console.log('selected',selected);
-          var filteredlist = list.filter(function(element){return element.category==selected});
+          var filteredlist = [];
+          if(selected=='All')
+          {
+            filteredlist = list;
+          }
+          else
+          {
+            filteredlist = list.filter(function(element){return element.category==selected});
+          }
           var htmlstr = '';
           htmlstr+='<div class="row wishlistrow">';
 
@@ -139,8 +144,8 @@ body
           
 
           $('#filteredlist').html(htmlstr);
-        })
-        
+    }
+    function renderStatistic() {
         var result = getStatistic();
         var htmlstr = '';//JSON.stringify(result)
         for (var prop in result)
@@ -149,9 +154,43 @@ body
         }
         console.log(result);
         $('#statistic').html(htmlstr);
-        
+    }
+
+    $(document).ready(function(){
+        // $('#itemDateStart').val(getSetableDate(new Date()));
+        $('#itemDateEnd').val(getSetableDate(new Date()));
+      
 
     })
+    
+            $('#getItems').on('click',function(){
+          console.log('getItems')
+          var dateStart = $('#itemDateStart').val();
+          var dateEnd = $('#itemDateEnd').val();
+          var data = { dateStart: dateStart, dateEnd: dateEnd};
+          console.log('data',data)
+          $.getJSON( "/item/search",data  )
+            .done(function( json ) {
+              list = json;
+              console.log('/item/search result', json);
+              renderStatistic();
+              $('#mitemCategory').val('All');
+              renderItemList()
+            })
+            .fail(function( jqxhr, textStatus, error ) {
+              var err = textStatus + ", " + error;
+              console.log( "Request Failed: " + err );
+            });
+          });
+          
+      $('#mitemCategory').on('change',function(){
+          renderItemList();
+
+          
+
+        })
+        
+  
   script.
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

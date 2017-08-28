@@ -243,6 +243,10 @@ function addToList(startDate, endDate, dayList,item){
 }
 // var d = new Date();
 // var todayDate = new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
+app.get('/dailynote/statistic',function(req, res) {
+    res.render('dailynote.statistic.pug');
+})
+
 app.get('/item/search',function(req,res){
   if(req.user)
   {
@@ -264,7 +268,8 @@ app.get('/item/search',function(req,res){
               
               cursor.sort({date:1}).toArray(function(err,list){
                 if(err){logger.error('/item/search toArray',err);return err;}
-                res.render('dailynote.statistic.pug',{list:list,liststr:JSON.stringify(list)});
+                
+                res.json(list);
               })
         })
     })
@@ -398,20 +403,20 @@ app.get('/admin/bindtest',function(req, res) {
 app.get('/dailyFamily/statistic',function(req, res) {
     if(req.user)
     {
-      getFamilyMembers(req.user.familyID,function(err,members){
-      collectionTransaction.find({owner:{$in:members}},function(err,cursor){
-          if(err){logger.error('/daily find',err);return err;}
+      // getFamilyMembers(req.user.familyID,function(err,members){
+      // collectionTransaction.find({owner:{$in:members}},function(err,cursor){
+      //     if(err){logger.error('/daily find',err);return err;}
           
-          cursor.sort({date:1}).toArray(function(err,list){
-            if(err){logger.error('/daily toArray',err);return err;}
-            var jrlist = setBalance(list);
-            res.render('dailynote.statistic.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
-          })
-      })      
-    })
+      //     cursor.sort({date:1}).toArray(function(err,list){
+      //       if(err){logger.error('/daily toArray',err);return err;}
+      //       var jrlist = setBalance(list);
+      //       res.render('dailynote.statistic.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
+      //     })
+      // })      
+      res.render('dailynote.statistic.pug');
     }
     else{
-       logger.info('/item/add not valid access')
+       logger.info('dailyFamily/statistic not valid access')
     res.redirect('/login');
     }
 });
