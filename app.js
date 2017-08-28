@@ -243,6 +243,39 @@ function addToList(startDate, endDate, dayList,item){
 }
 // var d = new Date();
 // var todayDate = new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0,0);
+app.get('/item/search',function(req,res){
+  if(req.user)
+  {
+    console.log(req.query);
+    var startDate = new Date(req.query.dateStart)
+    var endDate = new Date(req.query.dateEnd)
+    
+    getFamilyMembers(req.user.familyID,function(err,members){
+      var query = 
+        {$and:
+          [
+            {owner:{$in:members}},
+            {date:{$gte:startDate}},
+            {date:{$lte:endDate}}
+          ]
+        };
+        collectionTransaction.find(query,function(err,cursor){
+              if(err){logger.error('/item/search find',err);return err;}
+              
+              cursor.sort({date:1}).toArray(function(err,list){
+                if(err){logger.error('/item/search toArray',err);return err;}
+                res.render('dailynote.statistic.pug',{list:list,liststr:JSON.stringify(list)});
+              })
+        })
+    })
+  }
+  else{
+    logger.info('/item/add not valid access')
+    res.redirect('/login');
+  }
+
+})
+
 app.post('/item/add',function(req,res){
   if(req.user)
   {
@@ -362,6 +395,26 @@ app.get('/admin/bindtest',function(req, res) {
       res.send('good!')
     });
 })
+app.get('/dailyFamily/statistic',function(req, res) {
+    if(req.user)
+    {
+      getFamilyMembers(req.user.familyID,function(err,members){
+      collectionTransaction.find({owner:{$in:members}},function(err,cursor){
+          if(err){logger.error('/daily find',err);return err;}
+          
+          cursor.sort({date:1}).toArray(function(err,list){
+            if(err){logger.error('/daily toArray',err);return err;}
+            var jrlist = setBalance(list);
+            res.render('dailynote.statistic.pug',{list:jrlist,liststr:JSON.stringify(jrlist)});
+          })
+      })      
+    })
+    }
+    else{
+       logger.info('/item/add not valid access')
+    res.redirect('/login');
+    }
+});
 app.get('/dailyfamily',function(req, res) {
   if(req.user)
   {
