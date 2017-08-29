@@ -286,6 +286,7 @@ app.get('/item/search',function(req,res){
 app.post('/item/add',function(req,res){
   if(req.user)
   {
+    console.log(req);
     console.log(req.body);
     var expense = req.body.expense?parseFloat(req.body.expense):0;
     var income = req.body.income?parseFloat(req.body.income):0;
@@ -293,12 +294,12 @@ app.post('/item/add',function(req,res){
     collectionTransaction.insertOne({owner:req.user._id,date:new Date(req.body.date),title:req.body.title,
       expense:expense,income:income,category:req.body.category,memo:req.body.memo,bookID:req.body.bookID},function(err){
         if(err){logger.error('/item/add',err);return err;}
-        res.redirect('/daily');
+        res.send('successfully added');
     })
   }
   else{
     logger.info('/item/add not valid access')
-    res.redirect('/login');
+    res.redirect('/');
   }
 
 })
@@ -313,12 +314,12 @@ app.post('/item/modify',function(req,res){
     collectionTransaction.updateOne({_id:id},{$set:{date:new Date(req.body.date),title:req.body.title,
       expense:expense,income:income,category:req.body.category,memo:req.body.memo}},function(err){
         if(err){logger.error('/item/update',err);return err;}
-        res.redirect('/daily');
+        res.send('successfully added');
     })
   }
   else{
     logger.info('/item/modify not valid access')
-    res.redirect('/login');
+    res.redirect('/');
   }
 
 })

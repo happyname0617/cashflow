@@ -89,7 +89,7 @@ body
                   label(for='newItemMemo') 메모
                   input#newItemMemo.form-control(type='text', placeholder='메모',name='memo')
                 .form-group
-                  button.btn.btn-primary.btn-block(type='submit') 추가하기
+                  #itemAdd.button.btn.btn-primary.btn-block(type='button',data-dismiss='modal') 추가하기
             .modal-footer
               a.btn.btn-default(type='button', data-dismiss='modal') 닫기      
   section
@@ -136,12 +136,12 @@ body
                   label(for='mitemMemo') 메모
                   input#mitemMemo.form-control(type='text', placeholder='메모',name='memo')
                 .form-group
-                  button.btn.btn-success.btn-block(type='submit') 수정하기
+                  #itemModify.button.btn.btn-success.btn-block(type='button', data-dismiss='modal') 수정하기
               form(action="/item/delete" method="post")
                 .form-group
                   input#mDeleteItemID.form-control(type='hidden', placeholder='ID',name='id')
                 .form-group
-                  button.btn.btn-danger(type='submit') 삭제하기
+                  #itemDelete.button.btn.btn-danger(type='button', data-dismiss='modal') 삭제하기
             .modal-footer
               a.btn.btn-default(type='button', data-dismiss='modal') 닫기
   script.
@@ -214,7 +214,42 @@ body
               var err = textStatus + ", " + error;
               console.log( "Request Failed: " + err );
             });
-          
+        $('#itemAdd').on('click',function(){
+          var date = $('#newItemDate').val();
+          var title = $('#newItemTitle').val();
+          var expense = $('#newItemExpense').val();
+          var income = $('#newItemIncome').val();
+          var category = $('#newItemCategory').val();
+          var memo = $('#newItemMemo').val();
+          var data = {date:date,title:title,expense:expense,income:income,category:category,memo:memo,bookID:bookID}
+            $.post("/item/add",data, function(rdata, status){
+              //alert("Data: " + rdata + "\nStatus: " + status);
+              location.reload(true)
+            });
+          })
+        
+        $('#itemModify').on('click',function(){
+          var ID = $('#mitemID').val();
+          var date = $('#mitemDate').val();
+          var title = $('#mitemName').val();
+          var expense = $('#mitemExpense').val();
+          var income = $('#mitemIncome').val();
+          var category = $('#mitemCategory').val();
+          var memo = $('#mitemMemo').val();
+          var data = {id:ID,date:date,title:title,expense:expense,income:income,category:category,memo:memo,bookID:bookID}
+            $.post("/item/modify",data, function(rdata, status){
+              //alert("Data: " + rdata + "\nStatus: " + status);
+              location.reload(true);
+            });
+          })
+        $('#itemDelete').on('click',function(){
+          var ID = $('#mitemID').val();
+          var data = {id:ID}
+            $.post("/item/delete",data, function(rdata, status){
+              //alert("Data: " + rdata + "\nStatus: " + status);
+              location.reload(true);
+            });
+          })
        
     })
   script.
