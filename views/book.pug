@@ -3,7 +3,8 @@ include head.pug
 body
   include menu_login.pug
   section
-    h2 가계부이름 
+    h2 
+      span#bookName 가계부이름 
   section
     .btn.btn-primary.btn-block(data-toggle='modal', data-target='#modalItemAdd') 항목 추가하기 
   section
@@ -154,7 +155,7 @@ body
     }
     var list = !{liststr};
     console.log(list);
-    var bookID = bookID;
+    var bookID = '#{bookID}';
     $(function(){
         $('#myModal').modal({
             keyboard: true,
@@ -202,6 +203,19 @@ body
     
     $(document).ready(function(){
         $('#newItemDate').val(getSetableDate(new Date()))
+        console.log('bookID',bookID)
+         $.getJSON("/book/info/"+bookID)
+            .done(function( json ) {
+              bookName = json;
+              console.log('/book/info result', json);
+              $('#bookName').html(json.title)
+            })
+            .fail(function( jqxhr, textStatus, error ) {
+              var err = textStatus + ", " + error;
+              console.log( "Request Failed: " + err );
+            });
+          
+       
     })
   script.
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

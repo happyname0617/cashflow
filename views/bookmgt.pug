@@ -10,33 +10,34 @@ body
         h4.weddingdate 김병수&김재림&김요셉 
       #img
   section
-    .btn.btn-default.btn-block(data-toggle='modal', data-target='#modalBookAdd') 추가하기 
+    .btn.btn-default.btn-block(data-toggle='modal', data-target='#modalBookAdd') 가계부 추가하기 
   section
     .container-fluid
       h2 가계부 목록
-      .row.wishlistheader
-        .col-md-3.col-sm-3.col-xs-3
+      .row.wishlistheader.hidden-xs
+        .col-md-3.col-sm-3.col-xs-12
           h5 가계부이름
-        .col-md-2.col-sm-2.col-xs-2
+        .col-md-2.col-sm-2.col-xs-3
           h5 종류
         .col-md-3.col-sm-3.col-xs-3
           h5 메모            
-        .col-md-2.col-sm-2.col-xs-2
+        .col-md-2.col-sm-2.col-xs-3
           h5 열기
-        .col-md-2.col-sm-2.col-xs-2
+        .col-md-2.col-sm-2.col-xs-3
           h5 통계
       each item in books
         .row.wishlistrow
-          .col-md-3.col-sm-3.col-xs-3
-            div #{item.title}
-          .col-md-2.col-sm-2.col-xs-2
+          .col-md-3.col-sm-3.col-xs-12
+            div 
+              h4 #{item.title}
+          .col-md-2.col-sm-2.col-xs-3
             div #{item.type}
-          .col-md-3.col-sm-3.col-xs-3
+          .col-md-3.col-sm-3.col-xs-9
             div #{item.memo}
-          .col-md-2.col-sm-2.col-xs-2
-            a.btn.btn-success.btn-xs.btn-block.btnModify(href='/book/'+item._id) 열기 
-          .col-md-2.col-sm-2.col-xs-2
-            a.btn.btn-success.btn-xs.btn-block.btnModify(href='/book/stat/'+item._id) 통계 
+          .col-md-2.col-sm-2.col-xs-6
+            a.btn.btn-success.btn-block.btnModify(href='/book/'+item._id) 열기 
+          .col-md-2.col-sm-2.col-xs-6
+            a.btn.btn-success.btn-block.btnModify(href='/book/stat/'+item._id) 통계 
       div(style='padding-bottom:10px')
   section
     .container-fluid
