@@ -470,14 +470,16 @@ app.post('/books/add',function(req,res){
 app.get('/books',function(req, res) {
   if(req.user)
   {
-    collectionBooks.find({owner:req.user._id},function(err,cursor){
-        if(err){logger.error('/books find',err);return err;}
-        
-        cursor.sort({date:1}).toArray(function(err,list){
-          if(err){logger.error('/books toArray',err);return err;}
-          res.render('bookmgt.pug',{books:list});
-        })
-    })      
+    getFamilyMembers(req.user.familyID,function(err,members){
+      collectionBooks.find({owner:{$in:members}},function(err,cursor){
+          if(err){logger.error('/books find',err);return err;}
+          
+          cursor.sort({date:1}).toArray(function(err,list){
+            if(err){logger.error('/books toArray',err);return err;}
+            res.render('bookmgt.pug',{books:list});
+          })
+      })      
+    })
 
   }
   else{
