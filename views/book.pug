@@ -5,10 +5,10 @@ body
   section
     h2 가계부이름 
   section
-    .btn.btn-default.btn-block(data-toggle='modal', data-target='#modalItemAdd') 항목 추가하기 
+    .btn.btn-primary.btn-block(data-toggle='modal', data-target='#modalItemAdd') 항목 추가하기 
   section
     .container
-      .row.wishlistheader
+      .row.wishlistheader.hidden-xs
         .col-md-2.col-xs-12
           h5 날짜
         .col-md-2.col-xs-12
@@ -34,11 +34,11 @@ body
           .col-md-1.col-xs-12
             span #{item.category}
           .col-md-1.col-xs-4
-            span #{item.expense.toFixed(2)}
+            span 지출#{item.expense.toFixed(2)}
           .col-md-1.col-xs-4
-            span #{item.income.toFixed(2)}
+            span 수입#{item.income.toFixed(2)}
           .col-md-1.col-xs-4
-            span #{item.balance.toFixed(2)}
+            span 잔고#{item.balance.toFixed(2)}
           .col-md-2.col-xs-8
             span #{item.memo}
           .col-md-2.col-xs-4
@@ -88,7 +88,7 @@ body
                   label(for='newItemMemo') 메모
                   input#newItemMemo.form-control(type='text', placeholder='메모',name='memo')
                 .form-group
-                  button.btn.btn-success.btn-block(type='submit') 추가하기
+                  button.btn.btn-primary.btn-block(type='submit') 추가하기
             .modal-footer
               a.btn.btn-default(type='button', data-dismiss='modal') 닫기      
   section
