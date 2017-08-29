@@ -9,36 +9,36 @@ body
   section
     .container
       .row.wishlistheader
-        .col-md-2.col-xs-4
+        .col-md-2.col-xs-3
           h5 날짜
-        .col-md-2.col-xs-8
+        .col-md-2.col-xs-5
           h5 항목
+        .col-md-1.col-xs-4
+          h5 분류
         .col-md-1.col-xs-3
           h5 지출
         .col-md-1.col-xs-3
           h5 수입
-        .col-md-1.col-xs-3
+        .col-md-1.col-xs-6
           h5 잔고
-        .col-md-1.col-xs-3
-          h5 분류
         .col-md-2.col-xs-9
           h5 메모
         .col-md-2.col-xs-3
           h5 수정
       each item in list
         .row.wishlistrow
-          .col-md-2.col-xs-5
+          .col-md-2.col-xs-3
             span #{item.date.toLocaleDateString()}
-          .col-md-2.col-xs-7
+          .col-md-2.col-xs-5
             span #{item.title}
+          .col-md-1.col-xs-4
+            span #{item.category}
           .col-md-1.col-xs-3
             span #{item.expense.toFixed(2)}
           .col-md-1.col-xs-3
             span #{item.income.toFixed(2)}
-          .col-md-1.col-xs-3
+          .col-md-1.col-xs-6
             span #{item.balance.toFixed(2)}
-          .col-md-1.col-xs-3
-            span #{item.category}
           .col-md-2.col-xs-9
             span #{item.memo}
           .col-md-2.col-xs-3
